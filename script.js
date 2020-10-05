@@ -9,14 +9,19 @@ $(document).ready(function (){
     //     var textInput = $(this).sibilings("#city-name").val();
     //     searchArray.push(textInput);
     //     localStorage.setItem(textInput, JSON.stringify(searchArray))
-    //     renderCurrentDay(cityInput);
+    //     
+    searchCity(cityInput);
     // });
 
     moment().format('L');
 
    function searchCity(city) {
         var queryURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + APIKey;
-        console.log(queryURL);
+        
+        var queryURL2 = "http://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=" + APIKey;
+
+        var latitude = response.coord.lat;
+        var longitude = response.coord.lon;
 
         $.ajax({
             url: queryURL,
@@ -31,7 +36,18 @@ $(document).ready(function (){
             $("#temp").text("Temperature: " + response.main.temp + "F");
             $("#humidity").text("Humidity: " + response.main.humidity + "%");
             $("#wind-speed").text("Wind-Speed: " + response.wind.speed + "MPH");
-            $("#city-name").text(response.name);
+            
+            var weatherIcon = $("<img>");
+            weatherIcon.attr("src", "http://openweathermap.org/img/w" + response.weather[0].icon + ".png");
+
+            var queryURL3 = "http://api.openweathermap.org/data/2.5/uvi?lat=" +latitude + "&lon=" + longitude + "&appid=" + APIKey;
+
+            $.ajax({
+                url: queryURL3,
+                method: "GET"
+            }).then(function (UVIndex){
+                $("#UV-index").text("UV Index: " + response.result.value);
+            })
         })
     }
 })
