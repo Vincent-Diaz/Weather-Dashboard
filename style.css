@@ -20,3 +20,9 @@ body {
 h1 {
     padding-top: 20px;
 }
+
+#forecast-cards {
+    display: flex;
+    flex-direction: row;
+    justify-content: center/space-between;
+}
