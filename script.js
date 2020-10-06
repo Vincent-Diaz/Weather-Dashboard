@@ -88,17 +88,19 @@ $(document).ready(function (){
             var results = response.list
             $("#forecast-cards").empty();
 
-            for (var i = 0; i < results.length; i += 8) {
+            var curDay = moment().format('L');
+
+            for (var i = 0; i < 5; i++) {
                  
-                var date = results[i].dt_text
-                var setDate = moment().add(i + 1, 'days').format('L');
+               // var date = results[i].dt_text
+                var setDate = moment(curDay).add(i + 1, 'days').format('L');
                 var temp = results[i].main.temp;
                 var hum = results[i].main.humidity;
                 var weather = "https://openweathermap.org/img/w/" + results[i].weather[0].icon + ".png";
 
                 var elements = $(`
                 <div class="card-forecast">
-                    <div id="forecast" class="card-body">
+                    <div id="forecast" class="card-body" class="rounded">
                         <h5 class="card-title" id="forecast-date">${setDate}</h5>
                         <img src=${weather}>
                         <p class="text" id="forecast-temp">Temp: ${temp}</p>
