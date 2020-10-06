@@ -18,9 +18,9 @@ $(document).ready(function (){
    function searchCity() {
         var city = $("#city-input").val();
 
-        var queryURL = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&appid=" + APIKey;
+        var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&appid=" + APIKey;
         
-        var queryURL2 = "http://api.openweathermap.org/data/2.5/forecast?q=" + city + "&appid=" + APIKey;
+        var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&units=imperial&appid=" + APIKey;
 
         $.ajax({
             url: queryURL,
@@ -43,7 +43,7 @@ $(document).ready(function (){
             $("#wind-speed").text("Wind-Speed: " + response.wind.speed + "MPH");
             
             var weatherIcon = $("<img>");
-            weatherIcon.attr("src", "http://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
+            weatherIcon.attr("src", "https://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
 
             $("#current-icon").empty();
             $("#current-icon").append(weatherIcon);
@@ -52,7 +52,7 @@ $(document).ready(function (){
             var lon = JSON.stringify(response.coord.lon);
 
 
-            var queryURL3 = "http://api.openweathermap.org/data/2.5/uvi?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey;
+            var queryURL3 = "https://api.openweathermap.org/data/2.5/uvi?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey;
 
             $.ajax({
                 url: queryURL3,
@@ -61,11 +61,24 @@ $(document).ready(function (){
                 console.log(response)
 
                 var uvDisplay = $("<button>");
-                uvDisplay.addClass("btn btn-danger");
+                uvDisplay.addClass("btn btn-light");
 
                 $("#UV-index").text("UV Index: ");
                 $("#UV-index").append(uvDisplay.text(response.value));
+
+                if (response.value< 3) {
+                    $('.btn-light').css('background-color', 'green');
+                  } else if (response.value < 6) {
+                    $('.btn-light').css('background-color', 'yellow');
+                  } else if (response.value < 8) {
+                    $('.btn-light').css('background-color', 'orange');
+                  } else if (response.value < 11) {
+                    $('.btn-light').css('background-color', 'red');
+                  } else {
+                    $('.btn-light').css('background-color', 'purple');
+                  }
             })
+
         })
 
         $.ajax({
@@ -75,7 +88,27 @@ $(document).ready(function (){
             var results = response.list
             $("#forecast-cards").empty();
 
-            for (var i = 0; i < results.length; i +=8) {
+            for (var i = 0; i < results.length; i += 8) {
+                 
+                var date = results[i].dt_text
+                var setDate = moment().add(i + 1, 'days').format('L');
+                var temp = results[i].main.temp;
+                var hum = results[i].main.humidity;
+                var weather = "https://openweathermap.org/img/w/" + results[i].weather[0].icon + ".png";
+
+                var elements = $(`
+                <div class="card-forecast">
+                    <div id="forecast" class="card-body">
+                        <h5 class="card-title" id="forecast-date">${setDate}</h5>
+                        <img src=${weather}>
+                        <p class="text" id="forecast-temp">Temp: ${temp}</p>
+                        <p class="text" id="forecast-humidity1">Humidity: ${hum}</p>
+                    </div>
+                </div>    
+                `)
+
+                $("#forecast-cards").append(elements);
+                
 
             }
         })
