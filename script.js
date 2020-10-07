@@ -6,15 +6,18 @@ $(document).ready(function () {
         searchCity(searchArray[0]);
         renderSearchHistory();
     }
+    // Global varibale
     var city;
 
+    // On click for current and forecast weather
     $("#searchBtn").on("click", function (event) {
         event.preventDefault();
+        // User city cearch defined
         city = $("#city-input").val();
-        //var textInput = $(this).parent("#city-input").val();
         searchArray.unshift(city);
         console.log(searchArray);
-        //searchArray.push(textInput);
+
+        // saving city name into storage
         localStorage.setItem("city", JSON.stringify(searchArray))
 
         //$("#historyList").append(searchArray);
@@ -24,6 +27,7 @@ $(document).ready(function () {
 
     });
 
+    // On click for previous search items
     $("#historyList").on("click", ".btn", function (event) {
         event.preventDefault();
         city = $(this).text();
@@ -35,18 +39,19 @@ $(document).ready(function () {
 
 
 
-    //moment().format('L');
-
+    // Main function for the data per search
     function searchCity(city) {
         // var city = $("#city-input").val();
 
+        // Open Weather API for current weather
         var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&appid=" + APIKey;
-
+        // Open Weather API for five day forecast
         var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&units=imperial&appid=" +  APIKey;
 
         $.ajax({
             url: queryURL,
             method: "GET"
+            // Store all retrieved data insode of object response
         }).then(function (response) {
             console.log(response);
             //$("#current").empty();
@@ -56,6 +61,7 @@ $(document).ready(function () {
             $("#city-name").empty();
             $("#city-name").append(displayDate.text("(" + mainDate + ")"));
 
+            // Added .text to display id data
             var cityName = $("<h3>").text(response.name);
             $("#city-name").prepend(cityName);
             console.log(response.name);
@@ -75,12 +81,13 @@ $(document).ready(function () {
             var lat = JSON.stringify(response.coord.lat);
             var lon = JSON.stringify(response.coord.lon);
 
-
+            // Open Weather API for UVIndex
             var queryURL3 = "https://api.openweathermap.org/data/2.5/uvi?lat=" + lat + "&lon=" + lon + "&appid=" + APIKey;
 
             $.ajax({
                 url: queryURL3,
                 method: "GET"
+                // Store all retrieved data insode of object response
             }).then(function (response) {
                 console.log(response)
 
@@ -90,6 +97,7 @@ $(document).ready(function () {
                 $("#UV-index").text("UV Index: ");
                 $("#UV-index").append(uvDisplay.text(response.value));
 
+                // If/else statements for color of the UV index of current weather
                 if (response.value < 3) {
                     $('.btn-light').css('background-color', 'green');
                 } else if (response.value < 6) {
@@ -113,19 +121,16 @@ $(document).ready(function () {
             $.ajax({
                 url: queryURL2,
                 method: "GET"
+                // Store all retrieved data insode of object response
             }).then(function (response) {
                 console.log(response);
                 var results = response.list
                 console.log(results);
                 $("#forecast-cards").empty();
 
-                //var curDay = moment().format('L');
-
+                // Loop for the forecast list array and display a sinlge forecast
                 for (var i = 0; i < 5; i++) {
-
-
-                     var date = moment.unix(results[i].dt).format('LT');
-                     console.log(date)
+                    // Moment.js for date format
                     var setDate = moment().add(i + 1, 'days').format('L');
                     var temp = results[i].main.temp;
                     var hum = results[i].main.humidity;
@@ -150,6 +155,7 @@ $(document).ready(function () {
         })
     }
 
+    // Render function for the previous search items and button to show city clicked
     function renderSearchHistory() {
         $("#historyList").empty();
         console.log(searchArray);
