@@ -1,31 +1,53 @@
-$(document).ready(function (){
+$(document).ready(function () {
     var APIKey = "75fe2766124f299a48145ea5552ff987";
-    var searchArray = [];
+    //var searchArray = [];
+    var searchArray = JSON.parse(localStorage.getItem("city")) || [];
+    if (searchArray.length > 0) {
+        searchCity(searchArray[0]);
+        renderSearchHistory();
+    }
+    var city;
 
-     $("#searchBtn").on("click", searchCity)
-    //     event.preventDefault();
-    //     var cityInput = $("#city-input").val().trim();
+    $("#searchBtn").on("click", function (event) {
+        event.preventDefault();
+        city = $("#city-input").val();
+        //var textInput = $(this).parent("#city-input").val();
+        searchArray.unshift(city);
+        console.log(searchArray);
+        //searchArray.push(textInput);
+        localStorage.setItem("city", JSON.stringify(searchArray))
 
-    //     var textInput = $(this).sibilings("#city-name").val();
-    //     searchArray.push(textInput);
-    //     localStorage.setItem(textInput, JSON.stringify(searchArray))
-    //     
-    // searchCity(cityInput);
-    
+        //$("#historyList").append(searchArray);
 
-    moment().format('L');
+        searchCity(city);
+        renderSearchHistory();
 
-   function searchCity() {
-        var city = $("#city-input").val();
+    });
+
+    $("#historyList").on("click", ".btn", function (event) {
+        event.preventDefault();
+        city = $(this).text();
+
+        searchCity(city);
+
+    })
+
+
+
+
+    //moment().format('L');
+
+    function searchCity(city) {
+        // var city = $("#city-input").val();
 
         var queryURL = "https://api.openweathermap.org/data/2.5/weather?q=" + city + "&units=imperial&appid=" + APIKey;
-        
-        var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&units=imperial&appid=" + APIKey;
+
+        var queryURL2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + city + "&units=imperial&appid=" +  APIKey;
 
         $.ajax({
             url: queryURL,
             method: "GET"
-        }).then(function (response){
+        }).then(function (response) {
             console.log(response);
             //$("#current").empty();
             var mainDate = moment().format('L');
@@ -41,12 +63,14 @@ $(document).ready(function (){
             console.log(response.main.temp);
             $("#humidity").text("Humidity: " + response.main.humidity + "%");
             $("#wind-speed").text("Wind-Speed: " + response.wind.speed + "MPH");
-            
+
             var weatherIcon = $("<img>");
             weatherIcon.attr("src", "https://openweathermap.org/img/w/" + response.weather[0].icon + ".png");
 
-            $("#current-icon").empty();
-            $("#current-icon").append(weatherIcon);
+            $("#city-name").append(weatherIcon);
+            //$("#current-icon").empty();
+            //$("#current-icon").append(weatherIcon);
+
 
             var lat = JSON.stringify(response.coord.lat);
             var lon = JSON.stringify(response.coord.lon);
@@ -57,7 +81,7 @@ $(document).ready(function (){
             $.ajax({
                 url: queryURL3,
                 method: "GET"
-            }).then(function (response){
+            }).then(function (response) {
                 console.log(response)
 
                 var uvDisplay = $("<button>");
@@ -66,41 +90,50 @@ $(document).ready(function (){
                 $("#UV-index").text("UV Index: ");
                 $("#UV-index").append(uvDisplay.text(response.value));
 
-                if (response.value< 3) {
+                if (response.value < 3) {
                     $('.btn-light').css('background-color', 'green');
-                  } else if (response.value < 6) {
+                } else if (response.value < 6) {
                     $('.btn-light').css('background-color', 'yellow');
-                  } else if (response.value < 8) {
+                } else if (response.value < 8) {
                     $('.btn-light').css('background-color', 'orange');
-                  } else if (response.value < 11) {
+                } else if (response.value < 11) {
                     $('.btn-light').css('background-color', 'red');
-                  } else {
+                } else {
                     $('.btn-light').css('background-color', 'purple');
-                  }
+                }
             })
 
-        })
+            
 
-        $.ajax({
-            url: queryURL2,
-            method: "GET"
-        }).then(function (response){
-            var results = response.list
-            $("#forecast-cards").empty();
+            //var lat = JSON.stringify(response.coord.lat);
+            //var lon = JSON.stringify(response.coord.lon);
 
-            var curDay = moment().format('L');
+            //var queryURL2 = "https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&units=imperial&appid=" + APIKey;
 
-            for (var i = 0; i < 5; i++) {
-                 
-               // var date = results[i].dt_text
-                var setDate = moment(curDay).add(i + 1, 'days').format('L');
-                var temp = results[i].main.temp;
-                var hum = results[i].main.humidity;
-                var weather = "https://openweathermap.org/img/w/" + results[i].weather[0].icon + ".png";
+            $.ajax({
+                url: queryURL2,
+                method: "GET"
+            }).then(function (response) {
+                console.log(response);
+                var results = response.list
+                console.log(results);
+                $("#forecast-cards").empty();
 
-                var elements = $(`
+                //var curDay = moment().format('L');
+
+                for (var i = 0; i < 5; i++) {
+
+
+                     var date = moment.unix(results[i].dt).format('LT');
+                     console.log(date)
+                    var setDate = moment().add(i + 1, 'days').format('L');
+                    var temp = results[i].main.temp;
+                    var hum = results[i].main.humidity;
+                    var weather = "https://openweathermap.org/img/w/" + results[i].weather[0].icon + ".png";
+
+                    var elements = $(`
                 <div class="card-forecast">
-                    <div id="forecast" class="card-body" class="rounded">
+                    <div id="forecast" class="card-body border border-primary rounded">
                         <h5 class="card-title" id="forecast-date">${setDate}</h5>
                         <img src=${weather}>
                         <p class="text" id="forecast-temp">Temp: ${temp}</p>
@@ -109,10 +142,32 @@ $(document).ready(function (){
                 </div>    
                 `)
 
-                $("#forecast-cards").append(elements);
-                
+                    $("#forecast-cards").append(elements);
 
-            }
+
+                }
+            })
         })
+    }
+
+    function renderSearchHistory() {
+        $("#historyList").empty();
+        console.log(searchArray);
+        //var searchArray = JSON.parse(localStorage.getItem("searchArray"));
+
+        for (var i = 0; i < searchArray.length; i++) {
+            var searchInput = $("<button>");
+            searchInput.addClass("btn listBtn", "list-item-group");
+            searchInput.attr("id", searchArray[i]);
+            searchInput.text(searchArray[i]);
+            $("#historyList").append(searchInput);
+            console.log(searchArray[i]);
+        }
+
+
+
+
+
+
     }
 })
