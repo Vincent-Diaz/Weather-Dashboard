@@ -14,6 +14,7 @@ $(document).ready(function () {
         event.preventDefault();
         // User city cearch defined
         city = $("#city-input").val();
+
         searchArray.unshift(city);
         console.log(searchArray);
 
