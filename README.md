@@ -9,3 +9,7 @@ It also Includes a search history so that users can access their past search ter
 # Resources/Languages
 
 Jquery, CSS, HTML, Javascript, Moment.js, Bootstrap
+
+# Screenshot
+
+<img src="images/WeatherDashboard.gif">
